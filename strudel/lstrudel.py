@@ -294,3 +294,27 @@ class LStrudel:
         test_set_with_line_prob = pandas.concat([test_set_line_profile, pred_prob_df, y_test], axis=1)
 
         return test_set_with_line_prob
+    
+    def predict(self, test_set: pandas.DataFrame, method='predict_proba'):
+        profile_columns = ['file_name', 'sheet_name', 'line_number']
+
+        empty_line_removed_test_set = test_set[test_set['label'] != 'empty'].reset_index(drop=True)
+
+        test_set_line_profile = empty_line_removed_test_set[profile_columns]
+
+        clean_test_set = empty_line_removed_test_set.drop(profile_columns, axis=1)
+
+        X_test = clean_test_set.iloc[:, 0:len(clean_test_set.columns)-1]
+        y_test = clean_test_set.iloc[:, len(clean_test_set.columns) - 1: len(clean_test_set.columns)]
+
+        clf = RandomForestClassifier(n_jobs=self.n_jobs)
+
+        # clf.fit(X_train, np.ravel(y_train))
+
+        pred_prob = clf.predict_proba(X_test)
+
+        pred_prob_df = pandas.DataFrame(data=pred_prob, columns=clf.classes_ + '_prob')
+
+        test_set_with_line_prob = pandas.concat([test_set_line_profile, pred_prob_df, y_test], axis=1)
+
+        return test_set_with_line_prob

@@ -48,6 +48,23 @@ class CStrudel:
 
         return result
 
+    def predict(self, test_set: pandas.DataFrame):
+        profile_columns = ['file_name', 'sheet_name', 'row_index', 'column_index']
+
+        test_set_cell_profile = test_set[profile_columns]
+
+        clean_test_set = test_set.drop(profile_columns, axis=1)
+
+        X_test = clean_test_set.iloc[:, 0:len(clean_test_set.columns) - 1]
+        y_test = clean_test_set.iloc[:, len(clean_test_set.columns) - 1: len(clean_test_set.columns)]
+
+        clf = RandomForestClassifier(n_jobs=self.n_jobs)
+
+        pred = pandas.DataFrame(clf.predict(X_test), columns=['predict'], index=y_test.index)
+
+        result = pandas.concat([test_set_cell_profile, pred, y_test], axis=1)
+
+        return result
 
 def create_cell_feature_vector(file_json_dict):
     _feature_names = ['row_position', 'column_position', 'value_length', 'data_type',

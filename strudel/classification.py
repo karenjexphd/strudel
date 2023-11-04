@@ -55,3 +55,26 @@ class CrossValidation:
         cv_result_df = pandas.concat(results, axis=0)
 
         return cv_result_df
+    
+    def classify(self, dataset: pandas.DataFrame, model):
+        profile_columns = ['file_name', 'sheet_name']
+
+        clean_dataset = dataset[dataset['label'] != 'empty'].reset_index(drop=True)
+
+        if not isinstance(clean_dataset, pandas.DataFrame):
+            clean_dataset = pandas.DataFrame(clean_dataset)
+
+        results = []
+
+        if model == 'lstrudel':
+            ls = LStrudel()
+            result = ls.predict(clean_dataset)
+            results.append(result)
+        elif model == 'cstrudel':
+            cs = CStrudel()
+            result = cs.predict(clean_dataset)
+            results.append(result)
+
+        classify_result_df = []
+
+        return classify_result_df
