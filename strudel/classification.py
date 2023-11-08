@@ -62,17 +62,17 @@ class CrossValidation:
         clean_test_dataset = test_dataset[test_dataset['label'] != 'empty'].reset_index(drop=True)
 
         if not isinstance(clean_train_dataset, pandas.DataFrame):
-            train_df = pandas.DataFrame(clean_train_dataset)
+            clean_train_dataset = pandas.DataFrame(clean_train_dataset)
 
         if not isinstance(clean_test_dataset, pandas.DataFrame):
-            test_df = pandas.DataFrame(clean_test_dataset)
+            clean_test_dataset = pandas.DataFrame(clean_test_dataset)
 
         if model == 'lstrudel':
             ls = LStrudel()
-            results = ls.fit(train_df, test_df)
+            results = ls.fit(clean_train_dataset, clean_test_dataset)
         elif model == 'cstrudel':
             cs = CStrudel()
-            results = cs.fit(train_df, test_df)
+            results = cs.fit(clean_train_dataset, clean_test_dataset)
 
         tc_result_df = pandas.concat(results, axis=0)
 
