@@ -47,18 +47,27 @@ class CStrudel:
         result = pandas.concat([test_set_cell_profile, pred, y_test], axis=1)
 
         return result
+    
+    def train_classify(self, train_set: pandas.DataFrame, test_set: pandas.DataFrame):
 
-    def predict(self, test_set: pandas.DataFrame):
+        # Train on training dataset, predict classes for test dataset
+
         profile_columns = ['file_name', 'sheet_name', 'row_index', 'column_index']
 
         test_set_cell_profile = test_set[profile_columns]
 
+        clean_train_set = train_set.drop(profile_columns, axis=1)
         clean_test_set = test_set.drop(profile_columns, axis=1)
+
+        X_train = clean_train_set.iloc[:, 0:len(clean_train_set.columns) - 1]
+        y_train = clean_train_set.iloc[:, len(clean_train_set.columns) - 1:len(clean_train_set.columns)]
 
         X_test = clean_test_set.iloc[:, 0:len(clean_test_set.columns) - 1]
         y_test = clean_test_set.iloc[:, len(clean_test_set.columns) - 1: len(clean_test_set.columns)]
 
         clf = RandomForestClassifier(n_jobs=self.n_jobs)
+
+        clf.fit(X_train, np.ravel(y_train))
 
         pred = pandas.DataFrame(clf.predict(X_test), columns=['predict'], index=y_test.index)
 

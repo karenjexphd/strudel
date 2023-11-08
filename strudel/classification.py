@@ -55,26 +55,25 @@ class CrossValidation:
         cv_result_df = pandas.concat(results, axis=0)
 
         return cv_result_df
-    
-    def classify(self, dataset: pandas.DataFrame, model):
-        profile_columns = ['file_name', 'sheet_name']
 
-        clean_dataset = dataset[dataset['label'] != 'empty'].reset_index(drop=True)
+    def train_classify(self, train_dataset: pandas.DataFrame, test_dataset: pandas.DataFrame, model):
 
-        if not isinstance(clean_dataset, pandas.DataFrame):
-            clean_dataset = pandas.DataFrame(clean_dataset)
+        clean_train_dataset = train_dataset[train_dataset['label'] != 'empty'].reset_index(drop=True)
+        clean_test_dataset = test_dataset[test_dataset['label'] != 'empty'].reset_index(drop=True)
 
-        results = []
+        if not isinstance(clean_train_dataset, pandas.DataFrame):
+            train_df = pandas.DataFrame(clean_train_dataset)
 
-        if model == 'lstrudel':
-            ls = LStrudel()
-            result = ls.predict(clean_dataset)
-            results.append(result)
-        elif model == 'cstrudel':
-            cs = CStrudel()
-            result = cs.predict(clean_dataset)
-            results.append(result)
+        if not isinstance(clean_test_dataset, pandas.DataFrame):
+            test_df = pandas.DataFrame(clean_test_dataset)
 
-        classify_result_df = []
+            if model == 'lstrudel':
+                ls = LStrudel()
+                results = ls.fit(train_df, test_df)
+            elif model == 'cstrudel':
+                cs = CStrudel()
+                results = cs.fit(train_df, test_df)
 
-        return classify_result_df
+        tc_result_df = pandas.concat(results, axis=0)
+
+        return tc_result_df
