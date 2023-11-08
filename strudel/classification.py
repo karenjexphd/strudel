@@ -67,12 +67,12 @@ class CrossValidation:
         if not isinstance(clean_test_dataset, pandas.DataFrame):
             test_df = pandas.DataFrame(clean_test_dataset)
 
-            if model == 'lstrudel':
-                ls = LStrudel()
-                results = ls.fit(train_df, test_df)
-            elif model == 'cstrudel':
-                cs = CStrudel()
-                results = cs.fit(train_df, test_df)
+        if model == 'lstrudel':
+            ls = LStrudel()
+            results = ls.fit(train_df, test_df)
+        elif model == 'cstrudel':
+            cs = CStrudel()
+            results = cs.fit(train_df, test_df)
 
         tc_result_df = pandas.concat(results, axis=0)
 
