@@ -83,7 +83,7 @@ if __name__ == '__main__':
     with ProcessPool(max_workers=max_workers, max_tasks=max_tasks) as pool:
         optional_line_feature_vectors = pool.map(create_line_feature_vector, training_dataset).result()
 
-    line_fvs_dataset = process_pebble_results(optional_line_feature_vectors)
+    train_line_fvs_dataset = process_pebble_results(optional_line_feature_vectors)
 
     #    N.B. line_fvs_dataset ("line strudel feature vector") is a json object containing
     #         file_name, table_id, line_number, calculated line features (f_xxx), labels
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     with ProcessPool(max_workers=max_workers, max_tasks=max_tasks) as pool:
         optional_cell_feature_vectors = pool.map(create_cell_feature_vector, training_dataset).result()
 
-    cell_fvs_dataset = process_pebble_results(optional_cell_feature_vectors)
+    train_cell_fvs_dataset = process_pebble_results(optional_cell_feature_vectors)
 
     #    N.B. the cell_fvs_dataset cell_feature_vector is a concatenation of 
     #      - cell_profile_df   (metadata: file_name, sheet_name, row_index, column_index) 
@@ -108,17 +108,17 @@ if __name__ == '__main__':
         # Perform cross-validation for line classification 
         print('Cross-validating lstrudel...')
         cv = CrossValidation(n_splits=10)
-        line_cv_results = cv.cross_validate(line_fvs_dataset, LStrudel.algo_name)        # results of LStrudel().fit()
+        line_cv_results = cv.cross_validate(train_line_fvs_dataset, LStrudel.algo_name)        # results of LStrudel().fit()
 
         # Combine (merge) the cell feature vector with the line cross-validation results to generate cfvs_dataset
-        cell_fvs_dataset = combine_feature_vector(cell_fvs_dataset, line_cv_results)
+        train_cell_fvs_dataset = combine_feature_vector(train_cell_fvs_dataset, line_cv_results)
 
         # Perform cross-validation for cell classification 
         print('Cross-validating cstrduel...')
-        results = cv.cross_validate(cell_fvs_dataset, CStrudel.algorithm)        # results of CStrudel().fit()
+        results = cv.cross_validate(train_cell_fvs_dataset, CStrudel.algorithm)        # results of CStrudel().fit()
 
         # ** CHECK THIS ! NEED LINE FROM THE ORIGINAL FILE **
-        pandas.DataFrame.to_csv(results, cell_fvs_dataset, index=False)
+        pandas.DataFrame.to_csv(results, train_cell_fvs_dataset, index=False)
 
     else:   # train model on training dataset and predict line and cell classes in specified test dataset
     
@@ -127,24 +127,24 @@ if __name__ == '__main__':
         with ProcessPool(max_workers=max_workers, max_tasks=max_tasks) as pool:
             optional_line_feature_vectors = pool.map(create_line_feature_vector, test_dataset).result()
 
-        line_fvs_dataset = process_pebble_results(optional_line_feature_vectors)
+        test_line_fvs_dataset = process_pebble_results(optional_line_feature_vectors)
         
         # Calculate cell classification features for (test) dataset
         print('Creating cstrudel feature vector...')
         with ProcessPool(max_workers=max_workers, max_tasks=max_tasks) as pool:
             optional_cell_feature_vectors = pool.map(create_cell_feature_vector, test_dataset).result()
 
-        cell_fvs_dataset = process_pebble_results(optional_cell_feature_vectors)
+        test_cell_fvs_dataset = process_pebble_results(optional_cell_feature_vectors)
 
         # predict line classification
         print('Predicting line classes with lstrudel...')
-        cv = CrossValidation(n_splits=10)               
-        line_cv_classification = cv.train_classify(line_fvs_dataset, LStrudel.algo_name)
+        cv = CrossValidation(n_splits=10)
+        line_cv_classification = cv.train_classify(train_line_fvs_dataset, test_line_fvs_dataset, LStrudel.algo_name)
 
         # predict cell classification
         print('Predicting line classes with lstrudel...')
-        cv = CrossValidation(n_splits=10)               
-        cell_cv_classification = cv.train_classify(cell_fvs_dataset, CStrudel.algorithm)  
+        cv = CrossValidation(n_splits=10)
+        cell_cv_classification = cv.train_classify(train_cell_fvs_dataset, test_cell_fvs_dataset, CStrudel.algorithm)
 
         # 4. write the output in csv format
 
