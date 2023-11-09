@@ -74,6 +74,6 @@ class CrossValidation:
             cs = CStrudel()
             results = cs.fit(clean_train_dataset, clean_test_dataset)
 
-        tc_result_df = pandas.concat(results, axis=0)
+        # tc_result_df = pandas.concat(results, axis=0)
 
-        return tc_result_df
+        return results

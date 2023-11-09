@@ -117,8 +117,7 @@ if __name__ == '__main__':
         print('Cross-validating cstrduel...')
         results = cv.cross_validate(train_cell_fvs_dataset, CStrudel.algorithm)        # results of CStrudel().fit()
 
-        # ** CHECK THIS ! NEED LINE FROM THE ORIGINAL FILE **
-        pandas.DataFrame.to_csv(results, train_cell_fvs_dataset, index=False)
+        pandas.DataFrame.to_csv(results, output_path, index=False)
 
     else:   # train model on training dataset and predict line and cell classes in specified test dataset
     
@@ -148,5 +147,5 @@ if __name__ == '__main__':
 
         # 4. write the output in csv format
 
-        pandas.DataFrame.to_csv(results, line_cv_classification, index=False)
-        pandas.DataFrame.to_csv(results, cell_cv_classification, index=False)
+        pandas.DataFrame.to_csv(line_cv_classification, lines_output_path, index=False)
+        pandas.DataFrame.to_csv(cell_cv_classification, cells_output_path, index=False)
